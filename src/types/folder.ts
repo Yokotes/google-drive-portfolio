@@ -1,8 +1,11 @@
-import { Content } from './common'
+import { File } from './file'
 
 export interface Folder {
   id: string
-  url: string
   name: string
-  content: Content[]
+  parent: string | null
+  content: {
+    folders: Record<string, Folder>
+    files: Record<string, File>
+  }
 }

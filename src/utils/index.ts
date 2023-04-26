@@ -1,1 +1,1 @@
-export * from './typeCheckers'
+export * from './generateId'
