@@ -39,7 +39,7 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
   const [foldersMap, setFoldersMap] = useState<Record<string, Folder>>({
     main: {
       id: 'main',
-      name: 'main',
+      name: 'My Drive',
       parent: null,
       content: {
         folders: {},
