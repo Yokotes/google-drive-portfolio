@@ -42,9 +42,29 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
       name: 'My Drive',
       parent: null,
       content: {
-        folders: {},
-        files: {},
+        folders: {
+          test: {
+            id: 'test',
+            name: 'Test Folder',
+            parent: 'main',
+            content: { files: {}, folders: {} },
+          },
+        },
+        files: {
+          test: {
+            id: 'test',
+            name: 'Doc File',
+            parent: 'main',
+            extension: 'docx',
+          },
+        },
       },
+    },
+    test: {
+      id: 'test',
+      name: 'Test Folder',
+      parent: 'main',
+      content: { files: {}, folders: {} },
     },
   })
 

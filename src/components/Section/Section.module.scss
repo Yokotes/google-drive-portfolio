@@ -16,3 +16,34 @@
 .content {
   display: flex;
 }
+
+.item {
+  background-color: #f2f6fc;
+  color: #444746;
+  font-family: Arial, sans-serif;
+
+  padding: 14px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  min-width: 200px;
+
+  display: flex;
+  justify-content: space-between;
+}
+
+.main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-style: 14px;
+}
+
+.icon {
+  width: 20px;
+}
+
+.openMenuButton {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}

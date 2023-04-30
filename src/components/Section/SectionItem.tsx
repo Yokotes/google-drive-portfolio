@@ -1,13 +1,39 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { File, Folder } from 'types'
+import styles from './Section.module.scss'
+import { OpenMenuIcon } from './icons'
 
-interface Props {
-  // TODO: Move to types
-  data: Folder | File
+const ICONS = {
+  docx: '/images/doc.png',
+  xlsx: '/images/excel.png',
+  folder: '/images/folder.png',
 }
 
-export const SectionItem: React.FC<Props> = ({ data }) => {
-  // TODO: Temporary. Change later
-  return <Link to={`/folder/${data.id}`}>{data.name}</Link>
+interface Props {
+  title: string
+  icon: keyof typeof ICONS
+  url: string
+  menu?: JSX.Element
+}
+
+export const SectionItem: React.FC<Props> = ({ title, icon, url, menu }) => {
+  const [menuIsOpen, setMenuIsOpen] = useState(false)
+
+  const handleOpenMenuClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    setMenuIsOpen(true)
+  }
+
+  return (
+    <Link to={url} className={styles.item}>
+      <span className={styles.main}>
+        <img src={ICONS[icon]} alt="Section Icon" className={styles.icon} />
+        <span>{title}</span>
+      </span>
+      <button className={styles.openMenuButton} onClick={handleOpenMenuClick}>
+        <OpenMenuIcon />
+      </button>
+      {menuIsOpen && menu}
+    </Link>
+  )
 }
