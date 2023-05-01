@@ -3,7 +3,13 @@
 ## Overview
 
 Hi! This is a simple React app.
-I'm trying to create UI like in Google Drive with all functionality just for fun :) and practice.
+I'm trying to create UI like in Google Drive just for fun :) and practice.
+
+## Requirements
+
+- No UI libs, only self-written components
+- No Redux and other state-management libs
+- Optimized project, no extra rerenders
 
 ## List of functions
 
