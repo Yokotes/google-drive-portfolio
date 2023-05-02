@@ -1,18 +1,19 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './Breadcrumbs.module.scss'
 import { RightArrow, DownArrow } from './icons'
-import { PopoverMenu } from 'components'
+import { BreadcrumbsMenu } from './BreadcrumbsMenu'
 
 interface Props {
+  id: string
   title: string
   url: string
   last?: boolean
 }
 
-export const BreadcrumbsLink: React.FC<Props> = ({ title, url, last }) => {
+export const BreadcrumbsLink: React.FC<Props> = ({ id, title, url, last }) => {
   const [openMenu, setOpenMenu] = useState(false)
-  const buttonRef = useRef(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   const handleOpenMenuClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -25,6 +26,17 @@ export const BreadcrumbsLink: React.FC<Props> = ({ title, url, last }) => {
   const handleCloseMenu = useCallback(() => {
     setOpenMenu(false)
   }, [])
+
+  // TODO: Works really bad. FIX!!!
+  useEffect(() => {
+    const button = buttonRef.current
+
+    button?.addEventListener('blur', handleCloseMenu)
+
+    return () => {
+      button?.removeEventListener('blur', handleCloseMenu)
+    }
+  }, [handleCloseMenu])
 
   return (
     <>
@@ -43,10 +55,10 @@ export const BreadcrumbsLink: React.FC<Props> = ({ title, url, last }) => {
         </Link>
         {!last && <RightArrow />}
       </span>
-      <PopoverMenu
+      <BreadcrumbsMenu
+        folderId={id}
         open={openMenu}
         anchor={buttonRef.current}
-        closeHandler={handleCloseMenu}
       />
     </>
   )

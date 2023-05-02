@@ -36,6 +36,7 @@ export const Breadcrumbs: React.FC<Props> = ({ folderId }) => {
       {folders.map((folder, index, arr) => (
         <BreadcrumbsLink
           key={`link_${folder.id}`}
+          id={folder.id}
           title={folder.name}
           url={folder.id === 'main' ? '/' : `/folder/${folder.id}`}
           last={index === arr.length - 1}

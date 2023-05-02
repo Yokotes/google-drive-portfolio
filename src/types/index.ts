@@ -1,3 +1,5 @@
 export * from './file'
 export * from './folder'
 export * from './content'
+export * from './menu'
+export * from './anchor'

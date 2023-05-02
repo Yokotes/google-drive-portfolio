@@ -1,37 +1,17 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import styles from './PopoverMenu.module.scss'
+import { Anchor, PopoverMenuItem } from 'types'
+import { getCoords } from 'utils'
 
 interface Props {
   open: boolean
-  items?: []
-  anchor: HTMLElement | null
-  closeHandler: () => void
+  items?: PopoverMenuItem[]
+  anchor: Anchor
 }
 
-export const PopoverMenu: React.FC<Props> = ({
-  open,
-  items,
-  anchor,
-  closeHandler,
-}) => {
-  const coords = useMemo(() => anchor?.getBoundingClientRect(), [anchor])
-
-  useEffect(() => {
-    if (open) {
-      // TODO: Why does it fires immediately?
-      window.addEventListener('click', () => {
-        console.log('clicked')
-        closeHandler()
-      })
-      return
-    }
-
-    window.removeEventListener('click', () => {
-      console.log('clicked')
-      closeHandler()
-    })
-  }, [closeHandler, open])
+export const PopoverMenu: React.FC<Props> = ({ open, items, anchor }) => {
+  const coords = useMemo(() => getCoords(anchor), [anchor])
 
   return (
     <>
@@ -39,9 +19,18 @@ export const PopoverMenu: React.FC<Props> = ({
         createPortal(
           <div
             className={styles.popover}
-            style={{ top: coords?.y || 0, left: coords?.x || 0 }}
+            style={{ top: coords.y, left: coords.x }}
           >
-            kek
+            {items?.map((item) => (
+              <button
+                key={item.id}
+                className={styles.item}
+                onClick={item.onClick}
+              >
+                {item.icon}
+                <span>{item.text}</span>
+              </button>
+            ))}
           </div>,
           document.body
         )}
