@@ -7,28 +7,43 @@ interface Props {
   folderId: string
   open: boolean
   anchor: Anchor
+  closeHandler: () => void
 }
 
 export const BreadcrumbsMenu: React.FC<Props> = ({
   folderId,
   open,
   anchor,
+  closeHandler,
 }) => {
-  const { createFolder } = useDirectoryContext()
+  const { createFolder, createFile } = useDirectoryContext()
 
   const items = useMemo<PopoverMenuItem[]>(
     () => [
       {
         id: '0',
-        text: 'Create new folder',
-        icon: <>+</>,
+        text: 'New folder',
         onClick: () => {
           createFolder('kek', folderId)
         },
       },
+      {
+        id: '1',
+        text: 'New file',
+        onClick: () => {
+          createFile('kek', folderId, 'docx')
+        },
+      },
     ],
-    [createFolder, folderId]
+    [createFile, createFolder, folderId]
   )
 
-  return <PopoverMenu open={open} anchor={anchor} items={items} />
+  return (
+    <PopoverMenu
+      open={open}
+      anchor={anchor}
+      items={items}
+      closeHandler={closeHandler}
+    />
+  )
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './Breadcrumbs.module.scss'
 import { RightArrow, DownArrow } from './icons'
@@ -27,17 +27,6 @@ export const BreadcrumbsLink: React.FC<Props> = ({ id, title, url, last }) => {
     setOpenMenu(false)
   }, [])
 
-  // TODO: Works really bad. FIX!!!
-  useEffect(() => {
-    const button = buttonRef.current
-
-    button?.addEventListener('blur', handleCloseMenu)
-
-    return () => {
-      button?.removeEventListener('blur', handleCloseMenu)
-    }
-  }, [handleCloseMenu])
-
   return (
     <>
       <span className={styles.linkContainer}>
@@ -59,6 +48,7 @@ export const BreadcrumbsLink: React.FC<Props> = ({ id, title, url, last }) => {
         folderId={id}
         open={openMenu}
         anchor={buttonRef.current}
+        closeHandler={handleCloseMenu}
       />
     </>
   )

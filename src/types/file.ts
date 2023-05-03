@@ -1,6 +1,8 @@
+export type FileExtension = 'docx' | 'xlsx'
+
 export interface File {
   id: string
   name: string
-  extension: 'docx' | 'xlsx'
+  extension: FileExtension
   parent: string | null
 }

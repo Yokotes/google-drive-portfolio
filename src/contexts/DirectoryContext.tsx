@@ -1,5 +1,6 @@
+import { Observer, useObserver } from 'hooks'
 import React, { ReactNode, useCallback, useContext, useState } from 'react'
-import { File, Folder } from 'types'
+import { File, FileExtension, Folder } from 'types'
 import { generateId } from 'utils'
 
 /**
@@ -22,11 +23,76 @@ interface CreateFolder {
 }
 
 interface CreateFile {
-  (name: string, parent: string, extension: string): void
+  (name: string, parent: string, extension: FileExtension): void
+}
+
+// main: {
+//   id: 'main',
+//   name: 'My Drive',
+//   parent: null,
+//   content: {
+//     folders: {
+//       test: {
+//         id: 'test',
+//         name: 'Test Folder',
+//         parent: 'main',
+//         content: { files: {}, folders: {} },
+//       },
+//     },
+//     files: {
+//       test: {
+//         id: 'test',
+//         name: 'Doc File',
+//         parent: 'main',
+//         extension: 'docx',
+//       },
+//     },
+//   },
+// },
+// test: {
+//   id: 'test',
+//   name: 'Test Folder',
+//   parent: 'main',
+//   content: { files: {}, folders: {} },
+// },
+
+type FolderMap = Record<string, Folder>
+
+const DEFAULT_FOLDERS: FolderMap = {
+  main: {
+    id: 'main',
+    name: 'My Drive',
+    parent: null,
+    content: {
+      folders: {
+        test: {
+          id: 'test',
+          name: 'Test Folder',
+          parent: 'main',
+          content: { files: {}, folders: {} },
+        },
+      },
+      files: {
+        test: {
+          id: 'test',
+          name: 'Doc File',
+          parent: 'main',
+          extension: 'docx',
+        },
+      },
+    },
+  },
+  test: {
+    id: 'test',
+    name: 'Test Folder',
+    parent: 'main',
+    content: { files: {}, folders: {} },
+  },
 }
 
 interface DirectoryContextValue {
-  foldersMap: Record<string, Folder>
+  foldersMap: FolderMap
+  foldersMapObserver: Observer<FolderMap>
   createFolder: CreateFolder
   createFile: CreateFile
 }
@@ -36,37 +102,8 @@ const DirectoryContext = React.createContext<DirectoryContextValue | null>(null)
 export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [foldersMap, setFoldersMap] = useState<Record<string, Folder>>({
-    main: {
-      id: 'main',
-      name: 'My Drive',
-      parent: null,
-      content: {
-        folders: {
-          test: {
-            id: 'test',
-            name: 'Test Folder',
-            parent: 'main',
-            content: { files: {}, folders: {} },
-          },
-        },
-        files: {
-          test: {
-            id: 'test',
-            name: 'Doc File',
-            parent: 'main',
-            extension: 'docx',
-          },
-        },
-      },
-    },
-    test: {
-      id: 'test',
-      name: 'Test Folder',
-      parent: 'main',
-      content: { files: {}, folders: {} },
-    },
-  })
+  const [foldersMap, foldersMapObserver] =
+    useObserver<FolderMap>(DEFAULT_FOLDERS)
 
   const createFolder: CreateFolder = useCallback(
     (name, parent) => {
@@ -82,28 +119,25 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
         parent,
         content: { files: {}, folders: {} },
       } as Folder
-      setFoldersMap((prev) => ({
-        // TODO: Refactor this hell
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          content: {
-            ...prev[parent].content,
-            folders: {
-              ...prev[parent].content.folders,
-              [id]: folder,
-            },
+
+      foldersMap[parent] = {
+        ...foldersMap[parent],
+        content: {
+          ...foldersMap[parent].content,
+          folders: {
+            ...foldersMap[parent].content.folders,
+            [id]: folder,
           },
         },
-        [id]: folder,
-      }))
+      }
     },
     [foldersMap]
   )
 
   const createFile: CreateFile = useCallback(
     (name, parent, extension) => {
-      if (foldersMap[parent]) throw new Error(`Folder ${parent} doesn't exist!`)
+      if (!foldersMap[parent])
+        throw new Error(`Folder ${parent} doesn't exist!`)
 
       const id = generateId('file_' + name)
       const file = {
@@ -113,26 +147,24 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
         parent,
       } as File
 
-      setFoldersMap((prev) => ({
-        // Come up with this monster
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          content: {
-            ...prev[parent].content,
-            files: {
-              ...prev[parent].content.files,
-              [id]: file,
-            },
+      foldersMap[parent] = {
+        ...foldersMap[parent],
+        content: {
+          ...foldersMap[parent].content,
+          files: {
+            ...foldersMap[parent].content.files,
+            [id]: file,
           },
         },
-      }))
+      }
     },
     [foldersMap]
   )
 
   return (
-    <DirectoryContext.Provider value={{ foldersMap, createFolder, createFile }}>
+    <DirectoryContext.Provider
+      value={{ foldersMap, foldersMapObserver, createFolder, createFile }}
+    >
       {children}
     </DirectoryContext.Provider>
   )
@@ -142,7 +174,7 @@ export const useDirectoryContext = () => {
   const context = useContext(DirectoryContext)
 
   if (!context) {
-    throw new Error('Using useFolderContext ouside the FolderContextProvider!')
+    throw new Error('Wrap component with FolderContextProvider!')
   }
 
   return context
