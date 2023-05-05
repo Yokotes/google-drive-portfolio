@@ -1,5 +1,11 @@
-import React, { ReactNode, useCallback, useContext, useState } from 'react'
-import { File, Folder } from 'types'
+import React, {
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
+import { File, FileExtension, Folder } from 'types'
 import { generateId } from 'utils'
 
 /**
@@ -22,7 +28,7 @@ interface CreateFolder {
 }
 
 interface CreateFile {
-  (name: string, parent: string, extension: string): void
+  (name: string, parent: string, extension: FileExtension): void
 }
 
 type FoldersMap = Record<string, Folder>
@@ -70,6 +76,7 @@ const DirectoryContext = React.createContext<DirectoryContextValue | null>(null)
 export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  // TODO: Rewrite to useReducer
   const [foldersMap, setFoldersMap] = useState(DEFAULT_FOLDERS)
 
   const createFolder: CreateFolder = useCallback(
@@ -105,6 +112,10 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
     [foldersMap]
   )
 
+  const renameFolder = useCallback((newName: string, id: string) => {
+    setFoldersMap((prev) => ({ ...prev, [id]: { ...prev[id], name: newName } }))
+  }, [])
+
   const createFile: CreateFile = useCallback(
     (name, parent, extension) => {
       if (!foldersMap[parent])
@@ -135,6 +146,10 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
     },
     [foldersMap]
   )
+
+  useEffect(() => {
+    renameFolder('lol', 'test')
+  }, [renameFolder])
 
   return (
     <DirectoryContext.Provider value={{ foldersMap, createFolder, createFile }}>

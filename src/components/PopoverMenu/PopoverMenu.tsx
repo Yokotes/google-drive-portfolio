@@ -4,16 +4,6 @@ import styles from './PopoverMenu.module.scss'
 import { Anchor, PopoverMenuItem } from 'types'
 import { getCoords } from 'utils'
 
-const renderItem = (item: PopoverMenuItem) => {
-  if (item.type === 'custom') return item.render(styles.item)
-  if (item.type === 'default')
-    return (
-      <button key={item.id} className={styles.item} onClick={item.onClick}>
-        <span>{item.text}</span>
-      </button>
-    )
-}
-
 interface Props {
   open: boolean
   items?: PopoverMenuItem[]
@@ -33,12 +23,20 @@ export const PopoverMenu: React.FC<Props> = ({
     <>
       {open &&
         createPortal(
-          <div className={styles.container}>
+          <div className={styles.container} onClick={closeHandler}>
             <div
               className={styles.popover}
               style={{ top: coords.y, left: coords.x }}
             >
-              {items?.map(renderItem)}
+              {items?.map((item) => (
+                <button
+                  key={item.id}
+                  className={styles.item}
+                  onClick={item.onClick}
+                >
+                  <span>{item.text}</span>
+                </button>
+              ))}
             </div>
           </div>,
           document.body

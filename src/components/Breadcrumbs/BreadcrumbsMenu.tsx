@@ -2,7 +2,6 @@ import React, { useMemo } from 'react'
 import { PopoverMenu } from 'components'
 import { Anchor, PopoverMenuItem } from 'types'
 import { useDirectoryContext } from 'contexts'
-import { ButtonModal } from 'components/ButtonModal'
 
 interface Props {
   folderId: string
@@ -23,32 +22,21 @@ export const BreadcrumbsMenu: React.FC<Props> = ({
     () => [
       {
         id: '0',
-        type: 'custom',
-        render: (className) => (
-          <ButtonModal
-            key="createFolderModal"
-            buttonContent="New folder"
-            modalTitle="Create folder"
-            modalContent={<>Folder form</>}
-            className={className}
-          />
-        ),
+        text: 'New folder',
+        onClick: () => createFolder('New folder', folderId),
       },
       {
         id: '1',
-        type: 'custom',
-        render: (className) => (
-          <ButtonModal
-            key="createFileModal"
-            buttonContent="New file"
-            modalTitle="Create file"
-            modalContent={<>File form</>}
-            className={className}
-          />
-        ),
+        text: 'New document',
+        onClick: () => createFile('New file', folderId, 'docx'),
+      },
+      {
+        id: '2',
+        text: 'New spreadsheet',
+        onClick: () => createFile('New file', folderId, 'xlsx'),
       },
     ],
-    []
+    [createFile, createFolder, folderId]
   )
 
   return (
