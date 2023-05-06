@@ -5,11 +5,11 @@ import { useDirectoryContext } from 'contexts'
 import { useParams } from 'react-router-dom'
 
 export const FolderBoard: React.FC = () => {
-  const { foldersMap } = useDirectoryContext()
+  const { foldersMap, filesMap } = useDirectoryContext()
   const { id } = useParams<{ id: string }>()
-  const folder = foldersMap[id || 'main']
-  const folders = Object.values(folder.content.folders)
-  const files = Object.values(folder.content.files)
+  const currentFolder = foldersMap[id || 'main']
+  const files = currentFolder.files.map((file) => filesMap[file])
+  const folders = currentFolder.folders.map((folder) => foldersMap[folder])
 
   return (
     <div className={styles.board}>

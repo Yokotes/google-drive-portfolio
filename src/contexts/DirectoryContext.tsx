@@ -8,21 +8,6 @@ import React, {
 import { File, FileExtension, Folder } from 'types'
 import { generateId } from 'utils'
 
-/**
- * addFolder(folderConfig)
- * addFile(fileConfig)
- *
- *  folderConfig: {
- *    name: 'main'
- *    parent: 123456
- *  }
- *
- *  fileConfig: {
- *    name: 'kek',
- *    extension: 'docx'
- *  }
- */
-
 interface CreateFolder {
   (name: string, parent: string): void
 }
@@ -32,44 +17,47 @@ interface CreateFile {
 }
 
 type FoldersMap = Record<string, Folder>
+type FilesMap = Record<string, File>
 
 const DEFAULT_FOLDERS: FoldersMap = {
   main: {
     id: 'main',
     name: 'My Drive',
     parent: null,
-    content: {
-      folders: {
-        test: {
-          id: 'test',
-          name: 'Test Folder',
-          parent: 'main',
-          content: { files: {}, folders: {} },
-        },
-      },
-      files: {
-        test: {
-          id: 'test',
-          name: 'Doc File',
-          parent: 'main',
-          extension: 'docx',
-        },
-      },
-    },
+    folders: ['test'],
+    files: ['testFile'],
   },
   test: {
     id: 'test',
     name: 'Test Folder',
     parent: 'main',
-    content: { files: {}, folders: {} },
+    folders: [],
+    files: [],
+  },
+}
+
+const DEFAULT_FILES_MAP: FilesMap = {
+  testFile: {
+    id: 'testFile',
+    name: 'Doc File',
+    parent: 'main',
+    extension: 'docx',
   },
 }
 
 interface DirectoryContextValue {
-  foldersMap: Record<string, Folder>
+  foldersMap: FoldersMap
+  filesMap: FilesMap
   createFolder: CreateFolder
   createFile: CreateFile
 }
+
+// How data structure does should look like?
+// 1. It needs easy to render routes (all folders and files in the same place, array)
+// 2. It needs easy to render breadcrumbs (should contain parent field to backtrace)
+
+// Do I need to store folders and files in the same place?
+// Yes, I need to prevent extra check when folder contant renders
 
 const DirectoryContext = React.createContext<DirectoryContextValue | null>(null)
 
@@ -78,6 +66,7 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   // TODO: Rewrite to useReducer
   const [foldersMap, setFoldersMap] = useState(DEFAULT_FOLDERS)
+  const [filesMap, setFilesMap] = useState(DEFAULT_FILES_MAP)
 
   const createFolder: CreateFolder = useCallback(
     (name, parent) => {
@@ -91,29 +80,22 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
         id,
         name,
         parent,
-        content: { files: {}, folders: {} },
+        files: [],
+        folders: [],
       } as Folder
-      setFoldersMap((prev) => ({
-        // TODO: Refactor this hell
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          content: {
-            ...prev[parent].content,
-            folders: {
-              ...prev[parent].content.folders,
-              [id]: folder,
-            },
-          },
-        },
-        [id]: folder,
-      }))
+
+      setFoldersMap((prev) => {
+        const parentFolder = prev[parent]
+        parentFolder.folders.push(id)
+
+        return { ...prev, [parent]: parentFolder, [id]: folder }
+      })
     },
     [foldersMap]
   )
 
   const renameFolder = useCallback((newName: string, id: string) => {
-    setFoldersMap((prev) => ({ ...prev, [id]: { ...prev[id], name: newName } }))
+    return null
   }, [])
 
   const createFile: CreateFile = useCallback(
@@ -121,7 +103,7 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
       if (!foldersMap[parent])
         throw new Error(`Folder ${parent} doesn't exist!`)
 
-      const id = generateId('file_' + name)
+      const id = generateId('file_')
       const file = {
         id,
         name,
@@ -129,20 +111,19 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
         parent,
       } as File
 
-      setFoldersMap((prev) => ({
-        // Come up with this monster
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          content: {
-            ...prev[parent].content,
-            files: {
-              ...prev[parent].content.files,
-              [id]: file,
-            },
-          },
-        },
-      }))
+      // Batching will handle this in one render. Thanks, React!
+      setFilesMap((prev) => ({ ...prev, [id]: file }))
+      setFoldersMap((prev) => {
+        const parentFolder = prev[parent]
+
+        // There is an extra invoking this function in strict mode. I don't known why it happens
+        // TODO: Come up how to fix it without this statement
+        if (parentFolder.files.includes(id)) return prev
+
+        parentFolder.files.push(id)
+
+        return { ...prev, [parent]: parentFolder }
+      })
     },
     [foldersMap]
   )
@@ -152,7 +133,9 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
   }, [renameFolder])
 
   return (
-    <DirectoryContext.Provider value={{ foldersMap, createFolder, createFile }}>
+    <DirectoryContext.Provider
+      value={{ foldersMap, filesMap, createFolder, createFile }}
+    >
       {children}
     </DirectoryContext.Provider>
   )
