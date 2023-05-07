@@ -1,23 +1,17 @@
-import React, {
-  ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
-import { File, FileExtension, Folder } from 'types'
+import React, { ReactNode, useCallback, useContext, useState } from 'react'
+import {
+  CreateFile,
+  CreateFolder,
+  File,
+  FilesMap,
+  Folder,
+  FoldersMap,
+  RemoveFile,
+  RemoveFolder,
+  RenameFile,
+  RenameFolder,
+} from 'types'
 import { generateId } from 'utils'
-
-interface CreateFolder {
-  (name: string, parent: string): void
-}
-
-interface CreateFile {
-  (name: string, parent: string, extension: FileExtension): void
-}
-
-type FoldersMap = Record<string, Folder>
-type FilesMap = Record<string, File>
 
 const DEFAULT_FOLDERS: FoldersMap = {
   main: {
@@ -50,6 +44,10 @@ interface DirectoryContextValue {
   filesMap: FilesMap
   createFolder: CreateFolder
   createFile: CreateFile
+  renameFolder: RenameFolder
+  renameFile: RenameFile
+  removeFolder: RemoveFolder
+  removeFile: RemoveFile
 }
 
 // How data structure does should look like?
@@ -94,9 +92,41 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
     [foldersMap]
   )
 
-  const renameFolder = useCallback((newName: string, id: string) => {
-    return null
-  }, [])
+  const renameFolder: RenameFolder = useCallback(
+    (newName, id) => {
+      if (!foldersMap[id]) throw new Error(`Folder ${id} doesn't exist!`)
+
+      const folder = foldersMap[id]
+
+      if (folder.name === newName) return
+
+      folder.name = newName
+
+      setFoldersMap((prev) => ({
+        ...prev,
+        [id]: folder,
+      }))
+    },
+    [foldersMap]
+  )
+
+  const renameFile: RenameFile = useCallback(
+    (newName, id) => {
+      if (!filesMap[id]) throw new Error(`File ${id} doesn't exist!`)
+
+      const file = filesMap[id]
+
+      if (file.name === newName) return
+
+      file.name = newName
+
+      setFilesMap((prev) => ({
+        ...prev,
+        [id]: file,
+      }))
+    },
+    [filesMap]
+  )
 
   const createFile: CreateFile = useCallback(
     (name, parent, extension) => {
@@ -128,13 +158,57 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
     [foldersMap]
   )
 
-  useEffect(() => {
-    renameFolder('lol', 'test')
-  }, [renameFolder])
+  const removeFolder: RemoveFolder = useCallback(
+    (id) => {
+      if (!foldersMap[id]) throw new Error(`Folder ${id} doesn't exist!`)
+
+      setFoldersMap((prev) => {
+        const parent = prev[id].parent
+
+        if (!parent) throw new Error(`Can't remove main folder!`)
+
+        prev[parent].folders = prev[parent].folders.filter(
+          (item) => item !== id
+        )
+        delete prev[id]
+
+        return { ...prev }
+      })
+    },
+    [foldersMap]
+  )
+
+  const removeFile: RemoveFile = useCallback(
+    (id) => {
+      if (!filesMap[id]) throw new Error(`File ${id} doesn't exist!`)
+
+      const parent = filesMap[id].parent
+
+      setFilesMap((prev) => {
+        delete prev[id]
+        return { ...prev }
+      })
+
+      setFoldersMap((prev) => {
+        prev[parent].files = prev[parent].files.filter((item) => item !== id)
+        return { ...prev }
+      })
+    },
+    [filesMap]
+  )
 
   return (
     <DirectoryContext.Provider
-      value={{ foldersMap, filesMap, createFolder, createFile }}
+      value={{
+        foldersMap,
+        filesMap,
+        createFolder,
+        createFile,
+        renameFolder,
+        renameFile,
+        removeFolder,
+        removeFile,
+      }}
     >
       {children}
     </DirectoryContext.Provider>

@@ -8,7 +8,7 @@ interface Props {
   open: boolean
   items?: PopoverMenuItem[]
   anchor: Anchor
-  closeHandler: () => void
+  closeHandler: (e: React.SyntheticEvent) => void
 }
 
 export const PopoverMenu: React.FC<Props> = ({
