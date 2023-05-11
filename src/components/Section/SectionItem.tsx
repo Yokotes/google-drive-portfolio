@@ -32,12 +32,23 @@ export const SectionItem: React.FC<Props> = ({
   onRename,
 }) => {
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const [buttonPos, setButtonPos] = useState({ x: 0, y: 0 })
   const [menuIsOpen, setMenuIsOpen] = useState(false)
 
-  const handleOpenMenuClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-    setMenuIsOpen(true)
-  }
+  const handleOpenMenuClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault()
+      setMenuIsOpen(true)
+
+      const pos = buttonRef.current?.getBoundingClientRect()
+
+      if (!pos) return
+      if (pos.x === buttonPos.x && pos.y === buttonPos.y) return
+
+      setButtonPos({ x: pos.x, y: pos.y })
+    },
+    [buttonPos.x, buttonPos.y]
+  )
 
   const handleCloseMenu = useCallback((e: React.SyntheticEvent) => {
     e.preventDefault()
@@ -62,7 +73,7 @@ export const SectionItem: React.FC<Props> = ({
         <Menu
           id={id}
           open={menuIsOpen}
-          anchor={buttonRef.current}
+          anchor={buttonPos}
           closeHandler={handleCloseMenu}
         />
       )}

@@ -15,8 +15,12 @@ export const FolderBoard: React.FC = () => {
     <div className={styles.board}>
       <div className={styles.content}>
         <Header />
-        {folders.length > 0 && <Section title="Folders" items={folders} />}
-        {files.length > 0 && <Section title="Files" items={files} />}
+        {folders.length > 0 && (
+          <Section title="Folders" contentType="folder" items={folders} />
+        )}
+        {files.length > 0 && (
+          <Section title="Files" contentType="file" items={files} />
+        )}
       </div>
     </div>
   )

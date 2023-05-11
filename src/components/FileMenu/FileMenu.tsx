@@ -11,7 +11,6 @@ interface Props {
   closeHandler: (e: React.SyntheticEvent) => void
 }
 
-// TODO: Anchor saves prev position after deleting folders
 export const FileMenu: React.FC<Props> = ({
   id,
   anchor,
