@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import styles from './Section.module.scss'
 import { OpenMenuIcon } from './icons'
 import { InputLabel, PopoverMenu } from 'components'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 const ICONS = {
   docx: '/images/doc.png',
@@ -34,6 +36,13 @@ export const SectionItem: React.FC<Props> = ({
   const buttonRef = useRef<HTMLButtonElement>(null)
   const [buttonPos, setButtonPos] = useState({ x: 0, y: 0 })
   const [menuIsOpen, setMenuIsOpen] = useState(false)
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
 
   const handleOpenMenuClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -56,7 +65,14 @@ export const SectionItem: React.FC<Props> = ({
   }, [])
 
   return (
-    <Link to={url} className={styles.item}>
+    <div
+      className={styles.item}
+      style={style}
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+    >
+      {/* <Link to={url} > */}
       <span className={styles.main}>
         <img src={ICONS[icon]} alt="Section Icon" className={styles.icon} />
         <InputLabel onSubmit={onRename} text={title} />
@@ -77,6 +93,7 @@ export const SectionItem: React.FC<Props> = ({
           closeHandler={handleCloseMenu}
         />
       )}
-    </Link>
+      {/* </Link> */}
+    </div>
   )
 }

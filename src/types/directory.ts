@@ -25,5 +25,13 @@ export interface RemoveFile {
   (id: string): void
 }
 
+export interface UpdateChildrenFiles {
+  (id: string, files: string[]): void
+}
+
+export interface UpdateChildrenFolders {
+  (id: string, folders: string[]): void
+}
+
 export type FoldersMap = Record<string, Folder>
 export type FilesMap = Record<string, File>

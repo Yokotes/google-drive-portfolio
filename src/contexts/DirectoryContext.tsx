@@ -10,6 +10,8 @@ import {
   RemoveFolder,
   RenameFile,
   RenameFolder,
+  UpdateChildrenFiles,
+  UpdateChildrenFolders,
 } from 'types'
 import { generateId } from 'utils'
 
@@ -48,6 +50,8 @@ interface DirectoryContextValue {
   renameFile: RenameFile
   removeFolder: RemoveFolder
   removeFile: RemoveFile
+  updateChildrenFiles: UpdateChildrenFiles
+  updateChildrenFolders: UpdateChildrenFolders
 }
 
 // How data structure does should look like?
@@ -62,7 +66,6 @@ const DirectoryContext = React.createContext<DirectoryContextValue | null>(null)
 export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  // TODO: Rewrite to useReducer
   const [foldersMap, setFoldersMap] = useState(DEFAULT_FOLDERS)
   const [filesMap, setFilesMap] = useState(DEFAULT_FILES_MAP)
 
@@ -197,6 +200,24 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
     [filesMap]
   )
 
+  const updateChildrenFolders: UpdateChildrenFolders = useCallback(
+    (id, folders) => {
+      if (!foldersMap[id]) throw new Error(`Folder ${id} doesn't exist!`)
+
+      setFoldersMap((prev) => ({ ...prev, [id]: { ...prev[id], folders } }))
+    },
+    [foldersMap]
+  )
+
+  const updateChildrenFiles: UpdateChildrenFiles = useCallback(
+    (id, files) => {
+      if (!foldersMap[id]) throw new Error(`Folder ${id} doesn't exist!`)
+
+      setFoldersMap((prev) => ({ ...prev, [id]: { ...prev[id], files } }))
+    },
+    [foldersMap]
+  )
+
   return (
     <DirectoryContext.Provider
       value={{
@@ -208,6 +229,8 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
         renameFile,
         removeFolder,
         removeFile,
+        updateChildrenFiles,
+        updateChildrenFolders,
       }}
     >
       {children}
