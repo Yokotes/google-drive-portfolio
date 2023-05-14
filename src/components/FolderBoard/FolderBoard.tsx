@@ -1,26 +1,17 @@
 import React from 'react'
 import styles from './FolderBoard.module.scss'
-import { Header, Section } from 'components'
-import { useDirectoryContext } from 'contexts'
-import { useParams } from 'react-router-dom'
+
+import { FileSection } from 'components/FileSection'
+import { Header } from 'components/Header'
+import { FolderSection } from 'components/FolderSection'
 
 export const FolderBoard: React.FC = () => {
-  const { foldersMap, filesMap } = useDirectoryContext()
-  const { id } = useParams<{ id: string }>()
-  const currentFolder = foldersMap[id || 'main']
-  const files = currentFolder.files.map((file) => filesMap[file])
-  const folders = currentFolder.folders.map((folder) => foldersMap[folder])
-
   return (
     <div className={styles.board}>
       <div className={styles.content}>
         <Header />
-        {folders.length > 0 && (
-          <Section title="Folders" contentType="folder" items={folders} />
-        )}
-        {files.length > 0 && (
-          <Section title="Files" contentType="file" items={files} />
-        )}
+        <FolderSection />
+        <FileSection />
       </div>
     </div>
   )

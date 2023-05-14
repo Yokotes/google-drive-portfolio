@@ -65,35 +65,29 @@ export const SectionItem: React.FC<Props> = ({
   }, [])
 
   return (
-    <div
-      className={styles.item}
-      style={style}
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-    >
-      {/* <Link to={url} > */}
-      <span className={styles.main}>
-        <img src={ICONS[icon]} alt="Section Icon" className={styles.icon} />
-        <InputLabel onSubmit={onRename} text={title} />
-      </span>
+    <div style={style} ref={setNodeRef} {...listeners} {...attributes}>
+      <Link to={url} className={styles.item}>
+        <span className={styles.main}>
+          <img src={ICONS[icon]} alt="Section Icon" className={styles.icon} />
+          <InputLabel onSubmit={onRename} text={title} />
+        </span>
 
-      <button
-        ref={buttonRef}
-        className={styles.openMenuButton}
-        onClick={handleOpenMenuClick}
-      >
-        <OpenMenuIcon />
-      </button>
-      {Menu && (
-        <Menu
-          id={id}
-          open={menuIsOpen}
-          anchor={buttonPos}
-          closeHandler={handleCloseMenu}
-        />
-      )}
-      {/* </Link> */}
+        <button
+          ref={buttonRef}
+          className={styles.openMenuButton}
+          onClick={handleOpenMenuClick}
+        >
+          <OpenMenuIcon />
+        </button>
+        {Menu && (
+          <Menu
+            id={id}
+            open={menuIsOpen}
+            anchor={buttonPos}
+            closeHandler={handleCloseMenu}
+          />
+        )}
+      </Link>
     </div>
   )
 }
