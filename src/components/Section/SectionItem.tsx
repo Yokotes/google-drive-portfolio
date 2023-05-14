@@ -36,6 +36,8 @@ export const SectionItem: React.FC<Props> = ({
   const buttonRef = useRef<HTMLButtonElement>(null)
   const [buttonPos, setButtonPos] = useState({ x: 0, y: 0 })
   const [menuIsOpen, setMenuIsOpen] = useState(false)
+  // TODO: Try to get rid of state
+  const [isDragStarted, setIsDragStarted] = useState(false)
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id })
 
@@ -64,9 +66,45 @@ export const SectionItem: React.FC<Props> = ({
     setMenuIsOpen(false)
   }, [])
 
-  return (
-    <div style={style} ref={setNodeRef} {...listeners} {...attributes}>
+  const handleDragStart = useCallback(
+    (e: React.DragEvent) => {
+      setIsDragStarted(true)
+      listeners?.onDragStart(e)
+    },
+    [listeners]
+  )
+
+  const handleDragEnd = useCallback(
+    (e: React.DragEvent) => {
+      setIsDragStarted(false)
+      listeners?.onDragEnd(e)
+    },
+    [listeners]
+  )
+
+  const CustomLink = ({ children }: { children: React.ReactNode }) => {
+    if (isDragStarted) {
+      return <span className={styles.item}>{children}</span>
+    }
+
+    // TODO: Fix link. Now it's broken and I don't know why
+    return (
       <Link to={url} className={styles.item}>
+        {children}
+      </Link>
+    )
+  }
+
+  return (
+    <div
+      style={style}
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <CustomLink>
         <span className={styles.main}>
           <img src={ICONS[icon]} alt="Section Icon" className={styles.icon} />
           <InputLabel onSubmit={onRename} text={title} />
@@ -79,15 +117,15 @@ export const SectionItem: React.FC<Props> = ({
         >
           <OpenMenuIcon />
         </button>
-        {Menu && (
-          <Menu
-            id={id}
-            open={menuIsOpen}
-            anchor={buttonPos}
-            closeHandler={handleCloseMenu}
-          />
-        )}
-      </Link>
+      </CustomLink>
+      {Menu && (
+        <Menu
+          id={id}
+          open={menuIsOpen}
+          anchor={buttonPos}
+          closeHandler={handleCloseMenu}
+        />
+      )}
     </div>
   )
 }
