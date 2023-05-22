@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import styles from './Breadcrumbs.module.scss'
 import { RightArrow, DownArrow } from './icons'
 import { BreadcrumbsMenu } from './BreadcrumbsMenu'
@@ -8,10 +8,9 @@ interface Props {
   id: string
   title: string
   url: string
-  last?: boolean
 }
 
-export const BreadcrumbsLink: React.FC<Props> = ({ id, title, url, last }) => {
+export const BreadcrumbsLink: React.FC<Props> = ({ id, title, url }) => {
   const [openMenu, setOpenMenu] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -27,22 +26,32 @@ export const BreadcrumbsLink: React.FC<Props> = ({ id, title, url, last }) => {
     setOpenMenu(false)
   }, [])
 
+  const renderArrow = useCallback(
+    (active: boolean) =>
+      active ? (
+        <button
+          className={styles.openMenuButton}
+          onClick={handleOpenMenuClick}
+          ref={buttonRef}
+        >
+          <DownArrow />
+        </button>
+      ) : (
+        <RightArrow />
+      ),
+    [handleOpenMenuClick]
+  )
   return (
     <>
       <span className={styles.linkContainer}>
-        <Link className={styles.link} to={url}>
-          {title}
-          {last && (
-            <button
-              className={styles.openMenuButton}
-              onClick={handleOpenMenuClick}
-              ref={buttonRef}
-            >
-              <DownArrow />
-            </button>
+        <NavLink className={styles.link} to={url}>
+          {({ isActive }) => (
+            <>
+              {title}
+              {renderArrow(isActive)}
+            </>
           )}
-        </Link>
-        {!last && <RightArrow />}
+        </NavLink>
       </span>
       <BreadcrumbsMenu
         folderId={id}

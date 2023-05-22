@@ -1,10 +1,10 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './Section.module.scss'
 import { OpenMenuIcon } from './icons'
 import { InputLabel, PopoverMenu } from 'components'
 import { useSortable } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
+import { CSS, Transform } from '@dnd-kit/utilities'
 
 const ICONS = {
   docx: '/images/doc.png',
@@ -15,6 +15,12 @@ const ICONS = {
 type MenuType = React.ComponentType<
   Omit<React.ComponentProps<typeof PopoverMenu>, 'items'> & { id: string }
 >
+
+const checkTransform = (transform: Transform | null) => {
+  if (!transform) return false
+
+  return transform.x !== 0 && transform.y !== 0
+}
 
 interface Props {
   id: string
@@ -36,8 +42,6 @@ export const SectionItem: React.FC<Props> = ({
   const buttonRef = useRef<HTMLButtonElement>(null)
   const [buttonPos, setButtonPos] = useState({ x: 0, y: 0 })
   const [menuIsOpen, setMenuIsOpen] = useState(false)
-  // TODO: Try to get rid of state
-  const [isDragStarted, setIsDragStarted] = useState(false)
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id })
 
@@ -66,45 +70,25 @@ export const SectionItem: React.FC<Props> = ({
     setMenuIsOpen(false)
   }, [])
 
-  const handleDragStart = useCallback(
-    (e: React.DragEvent) => {
-      setIsDragStarted(true)
-      listeners?.onDragStart(e)
+  const isDragging = useMemo(() => checkTransform(transform), [transform])
+
+  // TODO: Reduce amount of renders, and we got a new problem - renaming stopped working
+  const CustomLink = useCallback(
+    (props: Record<string, any>) => {
+      if (isDragging) return <span {...props}>{props.children}</span>
+
+      return (
+        <Link to={url} {...props}>
+          {props.children}
+        </Link>
+      )
     },
-    [listeners]
+    [isDragging, url]
   )
-
-  const handleDragEnd = useCallback(
-    (e: React.DragEvent) => {
-      setIsDragStarted(false)
-      listeners?.onDragEnd(e)
-    },
-    [listeners]
-  )
-
-  const CustomLink = ({ children }: { children: React.ReactNode }) => {
-    if (isDragStarted) {
-      return <span className={styles.item}>{children}</span>
-    }
-
-    // TODO: Fix link. Now it's broken and I don't know why
-    return (
-      <Link to={url} className={styles.item}>
-        {children}
-      </Link>
-    )
-  }
 
   return (
-    <div
-      style={style}
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <CustomLink>
+    <div style={style} ref={setNodeRef} {...listeners} {...attributes}>
+      <CustomLink className={styles.item}>
         <span className={styles.main}>
           <img src={ICONS[icon]} alt="Section Icon" className={styles.icon} />
           <InputLabel onSubmit={onRename} text={title} />
