@@ -5,16 +5,13 @@ import { OpenMenuIcon } from './icons'
 import { InputLabel, PopoverMenu } from 'components'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS, Transform } from '@dnd-kit/utilities'
+import { PopoverMenuItem } from 'types'
 
 const ICONS = {
   docx: '/images/doc.png',
   xlsx: '/images/excel.png',
   folder: '/images/folder.png',
 }
-
-type MenuType = React.ComponentType<
-  Omit<React.ComponentProps<typeof PopoverMenu>, 'items'> & { id: string }
->
 
 const checkTransform = (transform: Transform | null) => {
   if (!transform) return false
@@ -28,7 +25,7 @@ interface Props {
   icon: keyof typeof ICONS
   url: string
   onRename: (name: string) => void
-  Menu?: MenuType
+  menuItems?: PopoverMenuItem[]
 }
 
 export const SectionItem: React.FC<Props> = ({
@@ -36,12 +33,13 @@ export const SectionItem: React.FC<Props> = ({
   title,
   icon,
   url,
-  Menu,
   onRename,
+  menuItems = [],
 }) => {
   const buttonRef = useRef<HTMLButtonElement>(null)
   const [buttonPos, setButtonPos] = useState({ x: 0, y: 0 })
   const [menuIsOpen, setMenuIsOpen] = useState(false)
+  const [isInput, setIsInput] = useState(false)
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id })
 
@@ -50,20 +48,27 @@ export const SectionItem: React.FC<Props> = ({
     transition,
   }
 
-  const handleOpenMenuClick = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault()
-      setMenuIsOpen(true)
-
-      const pos = buttonRef.current?.getBoundingClientRect()
-
-      if (!pos) return
-      if (pos.x === buttonPos.x && pos.y === buttonPos.y) return
-
-      setButtonPos({ x: pos.x, y: pos.y })
+  const handleChangeInputLabel = useCallback(() => setIsInput(true), [])
+  // NOTE: Also not clear decision...
+  const handleRename = useCallback(
+    (name: string) => {
+      onRename(name)
+      setIsInput(false)
     },
-    [buttonPos.x, buttonPos.y]
+    [onRename]
   )
+
+  const handleOpenMenuClick = useCallback(() => {
+    console.log('jej')
+    setMenuIsOpen(true)
+
+    const pos = buttonRef.current?.getBoundingClientRect()
+
+    if (!pos) return
+    if (pos.x === buttonPos.x && pos.y === buttonPos.y) return
+
+    setButtonPos({ x: pos.x, y: pos.y })
+  }, [buttonPos.x, buttonPos.y])
 
   const handleCloseMenu = useCallback((e: React.SyntheticEvent) => {
     e.preventDefault()
@@ -75,7 +80,7 @@ export const SectionItem: React.FC<Props> = ({
   // TODO: Reduce amount of renders, and we got a new problem - renaming stopped working
   const CustomLink = useCallback(
     (props: Record<string, any>) => {
-      if (isDragging) return <span {...props}>{props.children}</span>
+      if (isDragging && isInput) return <span {...props}>{props.children}</span>
 
       return (
         <Link to={url} {...props}>
@@ -83,33 +88,52 @@ export const SectionItem: React.FC<Props> = ({
         </Link>
       )
     },
-    [isDragging, url]
+    [isDragging, isInput, url]
   )
 
+  const renameItem: PopoverMenuItem = useMemo(
+    () => ({
+      id: '1000',
+      text: 'Rename',
+      onClick: handleChangeInputLabel,
+    }),
+    [handleChangeInputLabel]
+  )
+
+  // NOTE: Pretty bad decisison, because it isn't clear. But I can't come up with a better solution. Maybe I'll fix it.
+  const menuNewItems = useMemo(
+    () => [...menuItems, renameItem],
+    [menuItems, renameItem]
+  )
+
+  // TODO: Drag and drop crush open menu.
   return (
-    <div style={style} ref={setNodeRef} {...listeners} {...attributes}>
-      <CustomLink className={styles.item}>
+    <div
+      style={style}
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      className={styles.item}
+    >
+      <CustomLink className={styles.link}>
         <span className={styles.main}>
           <img src={ICONS[icon]} alt="Section Icon" className={styles.icon} />
-          <InputLabel onSubmit={onRename} text={title} />
+          <InputLabel onSubmit={handleRename} text={title} isInput={isInput} />
         </span>
-
-        <button
-          ref={buttonRef}
-          className={styles.openMenuButton}
-          onClick={handleOpenMenuClick}
-        >
-          <OpenMenuIcon />
-        </button>
       </CustomLink>
-      {Menu && (
-        <Menu
-          id={id}
-          open={menuIsOpen}
-          anchor={buttonPos}
-          closeHandler={handleCloseMenu}
-        />
-      )}
+      <button
+        ref={buttonRef}
+        className={styles.openMenuButton}
+        onClick={handleOpenMenuClick}
+      >
+        <OpenMenuIcon />
+      </button>
+      <PopoverMenu
+        open={menuIsOpen}
+        anchor={buttonPos}
+        items={menuNewItems}
+        closeHandler={handleCloseMenu}
+      />
     </div>
   )
 }

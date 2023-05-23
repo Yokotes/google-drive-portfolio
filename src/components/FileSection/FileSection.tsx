@@ -1,4 +1,3 @@
-import { FileMenu } from 'components/FileMenu'
 import { Section, SectionItem } from 'components/Section'
 import {} from 'components/Section/SectionItem'
 import { useDirectoryContext } from 'contexts'
@@ -8,8 +7,14 @@ import { Content, File } from 'types'
 
 export const FileSection: React.FC = () => {
   const { id } = useParams<{ id: string }>()
-  const { renameFile, createFile, foldersMap, filesMap, updateChildrenFiles } =
-    useDirectoryContext()
+  const {
+    renameFile,
+    createFile,
+    foldersMap,
+    filesMap,
+    updateChildrenFiles,
+    removeFile,
+  } = useDirectoryContext()
   const currentFolder = foldersMap[id || 'main']
   const files = currentFolder.files.map((file) => filesMap[file])
 
@@ -34,6 +39,13 @@ export const FileSection: React.FC = () => {
     [createFile, id]
   )
 
+  const sectionItems = useCallback(
+    (sectionId: string) => [
+      { id: '1', text: 'Remove', onClick: () => removeFile(sectionId) },
+    ],
+    [removeFile]
+  )
+
   const renderChildren = useCallback(
     (item: Content) => {
       return (
@@ -44,11 +56,11 @@ export const FileSection: React.FC = () => {
           icon={(item as File).extension}
           url={`/file/${item.id}`}
           onRename={(name: string) => renameFile(name, item.id)}
-          Menu={FileMenu}
+          menuItems={sectionItems(item.id)}
         />
       )
     },
-    [renameFile]
+    [renameFile, sectionItems]
   )
 
   if (files.length < 1) return null

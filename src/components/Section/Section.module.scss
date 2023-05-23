@@ -20,17 +20,20 @@
 
 .item {
   background-color: #f2f6fc;
-  color: #444746;
   font-family: Arial, sans-serif;
 
   padding: 14px 16px;
   border-radius: 10px;
-  text-decoration: none;
   min-width: 200px;
 
   display: flex;
   justify-content: space-between;
   gap: 15px;
+}
+
+.link {
+  color: #444746;
+  text-decoration: none;
 }
 
 .main {

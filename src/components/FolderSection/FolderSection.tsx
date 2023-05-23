@@ -1,4 +1,3 @@
-import { FolderMenu } from 'components/FolderMenu'
 import { Section, SectionItem } from 'components/Section'
 import { useDirectoryContext } from 'contexts'
 import React, { useCallback, useMemo } from 'react'
@@ -34,6 +33,14 @@ export const FolderSection: React.FC = () => {
     [createFolder, id]
   )
 
+  const { removeFolder } = useDirectoryContext()
+  const sectionItems = useCallback(
+    (sectionId: string) => [
+      { id: '1', text: 'Remove', onClick: () => removeFolder(sectionId) },
+    ],
+    [removeFolder]
+  )
+
   const renderChildren = useCallback(
     (item: Content) => {
       return (
@@ -44,11 +51,11 @@ export const FolderSection: React.FC = () => {
           icon="folder"
           url={`/folder/${item.id}`}
           onRename={(name: string) => renameFolder(name, item.id)}
-          Menu={FolderMenu}
+          menuItems={sectionItems(item.id)}
         />
       )
     },
-    [renameFolder]
+    [renameFolder, sectionItems]
   )
 
   if (folders.length < 1) return null
