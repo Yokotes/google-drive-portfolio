@@ -1,15 +1,18 @@
 import React from 'react'
-import { Folder } from 'types'
 import styles from './FolderBoard.module.scss'
 
-interface Props {
-  folder: Folder
-}
+import { FileSection } from 'components/FileSection'
+import { Header } from 'components/Header'
+import { FolderSection } from 'components/FolderSection'
 
-export const FolderBoard: React.FC<Props> = ({ folder }) => {
+export const FolderBoard: React.FC = () => {
   return (
     <div className={styles.board}>
-      <div className={styles.content}>{folder.name}</div>
+      <div className={styles.content}>
+        <Header />
+        <FolderSection />
+        <FileSection />
+      </div>
     </div>
   )
 }
