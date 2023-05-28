@@ -29,7 +29,6 @@ interface Props {
   menuItems?: PopoverMenuItem[]
 }
 
-// TODO: Split component to separate components for folder and files, because too much checks
 export const Section: React.FC<Props> = ({
   title,
   items,

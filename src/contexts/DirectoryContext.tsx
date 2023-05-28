@@ -150,7 +150,6 @@ export const DirectoryContextProvider: React.FC<{ children: ReactNode }> = ({
         const parentFolder = prev[parent]
 
         // There is an extra invoking this function in strict mode. I don't known why it happens
-        // TODO: Come up how to fix it without this statement
         if (parentFolder.files.includes(id)) return prev
 
         parentFolder.files.push(id)

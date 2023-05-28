@@ -8,7 +8,6 @@ interface Props {
   folderId: string
 }
 
-// TODO: Maybe move to utils
 const getFoldersChain = (id: string, foldersMap: Record<string, Folder>) => {
   let currentFolder = foldersMap[id] as Folder | null
   const result = [] as Folder[]

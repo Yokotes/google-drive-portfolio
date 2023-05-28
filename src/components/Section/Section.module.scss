@@ -28,12 +28,13 @@
 
   display: flex;
   justify-content: space-between;
-  gap: 15px;
 }
 
 .link {
   color: #444746;
   text-decoration: none;
+  flex-grow: 1;
+  padding-right: 15px;
 }
 
 .main {

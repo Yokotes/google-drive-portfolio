@@ -21,7 +21,6 @@ export const Modal: React.FC<Props> = ({
     e.preventDefault()
   }, [])
 
-  // TODO: It is breaking popover close handler
   return createPortal(
     <div className={styles.container}>
       <div className={styles.modal} onClick={handleModalClick}>

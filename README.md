@@ -9,21 +9,19 @@ I'm trying to create UI like in Google Drive just for fun :) and practice.
 
 - No UI libs, only self-written components
 - No Redux and other state-management libs
-- Optimized project, no extra rerenders
 
 ## List of functions
 
 **W.I.P.:**
 
-- Creating a folder and a file (docx, xlsx)
-- Drag and drop folders and files
-- Changing a view (list, cards)
-- Sorting files
 - ... Maybe I'll come up with something else
 
 **Realised:**
 
-- ...
+- Creating a folder and a file (docx, xlsx)
+- Renaming items
+- Drag and drop folders and files
+- Sorting files
 
 ## How to run project
 

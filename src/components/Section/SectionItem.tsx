@@ -28,6 +28,7 @@ interface Props {
   menuItems?: PopoverMenuItem[]
 }
 
+// NOTE: Jeez... there is a lot of logic in this component
 export const SectionItem: React.FC<Props> = ({
   id,
   title,
@@ -44,7 +45,7 @@ export const SectionItem: React.FC<Props> = ({
     useSortable({ id })
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
   }
 
@@ -59,7 +60,6 @@ export const SectionItem: React.FC<Props> = ({
   )
 
   const handleOpenMenuClick = useCallback(() => {
-    console.log('jej')
     setMenuIsOpen(true)
 
     const pos = buttonRef.current?.getBoundingClientRect()
@@ -77,10 +77,9 @@ export const SectionItem: React.FC<Props> = ({
 
   const isDragging = useMemo(() => checkTransform(transform), [transform])
 
-  // TODO: Reduce amount of renders, and we got a new problem - renaming stopped working
   const CustomLink = useCallback(
     (props: Record<string, any>) => {
-      if (isDragging && isInput) return <span {...props}>{props.children}</span>
+      if (isDragging || isInput) return <span {...props}>{props.children}</span>
 
       return (
         <Link to={url} {...props}>
@@ -106,16 +105,18 @@ export const SectionItem: React.FC<Props> = ({
     [menuItems, renameItem]
   )
 
-  // TODO: Drag and drop crush open menu.
+  const sortableListeners = useMemo(
+    () => (!isInput ? listeners : {}),
+    [isInput, listeners]
+  )
+
   return (
-    <div
-      style={style}
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      className={styles.item}
-    >
-      <CustomLink className={styles.link}>
+    <div style={style} ref={setNodeRef} className={styles.item}>
+      <CustomLink
+        className={styles.link}
+        {...sortableListeners}
+        {...attributes}
+      >
         <span className={styles.main}>
           <img src={ICONS[icon]} alt="Section Icon" className={styles.icon} />
           <InputLabel onSubmit={handleRename} text={title} isInput={isInput} />
